@@ -1,4 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Remote;
 using System;
@@ -48,33 +49,31 @@ namespace BMICalculatorSeleniumTests
             var startTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var endTimestamp = startTimestamp + 60 * 10;
 
-            while (true)
-            {
-                try
-                {
-                    driver.Navigate().GoToUrl(webAppUrl);
-                    // Assert.AreEqual("Home Page - ASP.NET Core", driver.Title, "Expected title to be 'Home Page - ASP.NET Core'");
-                    Assert.AreEqual("Edit Here", "Edit Here");
+            string expectedValue = "Your BMI Category is Normal";
 
-                    break;
-                }
-                catch(Exception e)
-                {
-                    var currentTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-                               
-                    if (currentTimestamp > endTimestamp)
-                    {
-                        Console.Write("##vso[task.logissue type=error;]Test SampleFunctionalTest1 failed with error: " + e.ToString());
-                        throw;
-                    }
-                    Thread.Sleep(5000);
-                }
-            }
+
+            driver.Navigate().GoToUrl("http://localhost:50433/");
+            driver.Manage().Window.Size = new System.Drawing.Size(960, 1160);
+            driver.FindElement(By.Id("BMI_WeightStones")).Click();
+            driver.FindElement(By.Id("BMI_WeightStones")).SendKeys("12");
+            driver.FindElement(By.Id("BMI_WeightPounds")).Click();
+            driver.FindElement(By.Id("BMI_WeightPounds")).SendKeys("10");
+            driver.FindElement(By.Id("BMI_HeightFeet")).Click();
+            driver.FindElement(By.Id("BMI_HeightFeet")).SendKeys("6");
+            driver.FindElement(By.Id("BMI_HeightInches")).Click();
+            driver.FindElement(By.Id("BMI_HeightInches")).SendKeys("3");
+            driver.FindElement(By.CssSelector(".btn")).Click();
+            driver.FindElement(By.Id("BMIValue")).Click();
+            string actualValue = driver.FindElement(By.Id("BMICategory")).Text;
+
+            Assert.AreEqual(actualValue, expectedValue);
+
+
         }
 
         private RemoteWebDriver GetChromeDriver()
         {
-            var path = Environment.GetEnvironmentVariable("ChromeWebDriver");
+            var path = Environment.GetEnvironmentVariable("chromedriver");
             var options = new ChromeOptions();
             options.AddArguments("--no-sandbox");
 
